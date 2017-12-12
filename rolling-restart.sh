@@ -40,8 +40,12 @@ while getopts ":d:m:n:s:h" opt; do
 done
 
 if [ -z $MASTER ]; then
-    # TODO verify $MASTER contains :port!
     echo "Master node name including port must be provided. ex: -m localhost:9200"
+    exit -1
+fi
+
+if [[ ! "$MASTER" =~ .+:[0-9]+ ]]; then
+    echo "Master node $MASTER missing numeric port! ex: -m localhost:9200"
     exit -1
 fi
 

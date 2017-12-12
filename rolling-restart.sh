@@ -40,6 +40,7 @@ while getopts ":d:m:n:s:h" opt; do
 done
 
 if [ -z $MASTER ]; then
+    # TODO verify $MASTER contains :port!
     echo "Master node name including port must be provided. ex: -m localhost:9200"
     exit -1
 fi
@@ -92,7 +93,7 @@ for NODE in ${NODES[@]}; do
     echo ">>>>>> Restarting ${NODE} at $(date)"
 
     STATUS=""
-    echo ">>>>>> Verifying green cluster status"
+    echo ">>>>>> Verifying green cluster status via master $MASTER"
     while [ -z "$STATUS" ];
     do
         # verify cluster is green

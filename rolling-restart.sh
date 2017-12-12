@@ -68,7 +68,7 @@ do
     fi
 done
 
-# Test that files to be called with eval in in the path or have full or
+# Test that files to be called with eval in the path or have full or
 # relative paths specified
 for file in $SCRIPT $SHUTDOWN_SCRIPT
 do

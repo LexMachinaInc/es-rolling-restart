@@ -9,7 +9,7 @@ This is a simple script to do a controlled rolling restart of a multinode elasti
 * -s - SCRIPT - Script to run on each node to process the update. 
 
 ```
-# ./rolling-restart.sh -m master1.example.com:9200 -n ./node-list.txt -s ./node-update.sh
+# ./rolling-restart.sh -m master1.example.com:9200 -n ./node-list.txt -d ./node-shutdown-script.sh -s ./node-update.sh
 ```
 
 ### NODE_FILE

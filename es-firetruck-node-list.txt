@@ -1,4 +1,2 @@
-# FIXME exclude the master node!!
 es-firetruck-1:9200
 es-firetruck-2:9200
-es-firetruck-3:9200

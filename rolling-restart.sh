@@ -59,7 +59,7 @@ if [ -z $SHUTDOWN_SCRIPT ]; then
     exit -1
 fi
 
-# Test for existance of required files.
+# Test for existence of required files.
 for file in $NODE_FILE $SCRIPT $SHUTDOWN_SCRIPT
 do
     if [ ! -f $file ]; then

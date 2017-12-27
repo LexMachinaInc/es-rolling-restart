@@ -1,0 +1,6 @@
+es-yolo-2:9200
+es-yolo-3:9200
+es-yolo-4:9200
+es-yolo-5:9200
+es-yolo-6:9200
+es-yolo-7:9200

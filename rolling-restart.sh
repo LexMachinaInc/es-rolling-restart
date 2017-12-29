@@ -67,20 +67,20 @@ fi
 # Test for existence of required files.
 for file in $NODE_FILE $SCRIPT $SHUTDOWN_SCRIPT
 do
-    if [ ! -f $file ]; then
+    if [ ! -r $file ]; then
         echo "File not found: $file"
         exit -1
     fi
 done
 
 # Test that files to be called with eval in the path or have full or
-# relative paths specified
+# relative paths specified and are executable
 for file in $SCRIPT $SHUTDOWN_SCRIPT
 do
     path_to_file=$(which ${file})
     if [ "$path_to_file" == "" ]; then
-        echo "File not found: $file"
-	echo "Perhaps you need to prepend ./ to the filename."
+        echo "File not found: $file ($path_to_file)"
+	    echo "Perhaps you need to prepend ./ to the filename and/or make it executable."
         exit -1
     fi
 done
@@ -95,6 +95,16 @@ for NODE in ${NODES[@]}; do
     export PORT=${NODE##*:}  # keep everything after the ':', port number
 
     echo ">>>>>> Restarting ${NODE} at $(date)"
+
+    # verify all indexes on this cluster have a replica otherwise we can't remove a node
+    # and have a complete copy of all indexes (i.e., removing one node will make a green
+    # cluster red not yellow)
+    NUM_REPLICAS=`curl -sS -XGET $MASTER/_cat/indices?h=rep | awk NF | sort | uniq | paste -s`
+    # if there's a 0 in $NUM_REPLICA abort
+    if [[ "$NUM_REPLICAS" =~ 0.* ]] ; then
+        echo "There are indices without replicas: $NUM_REPLICAS"
+        exit -1
+    fi
 
     STATUS=""
     echo ">>>>>> Verifying green cluster status via master $MASTER"
@@ -138,6 +148,10 @@ for NODE in ${NODES[@]}; do
     done
 
     echo ">>>>>> Waiting for cluster to reach yellow status"
+    # NOTE: you can't do a rolling restart while an index is being created because we don't add
+    # replica until the index is complete so removing a node pushes cluster from green directly
+    # to red!
+
     # wait for cluster status yellow
     STATUS=""
     while [ -z "$STATUS" ];

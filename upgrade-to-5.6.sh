@@ -9,7 +9,7 @@ echo "Host: $HOST"
 echo "Port: $PORT"
 echo "ES_VERSION: $ES_VERSION"
 
-gcloud compute instances add-metadata es-firetruck-3 --zone us-central1-b -q --metadata "elasticsearch_version"="$ES_VERSION"
+gcloud compute instances add-metadata $HOST --zone us-central1-b -q --metadata "elasticsearch_version"="$ES_VERSION"
 
 ansible-playbook -l $HOST ../../es.yml
 

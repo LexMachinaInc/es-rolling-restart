@@ -99,7 +99,7 @@ for NODE in ${NODES[@]}; do
     # verify all indexes on this cluster have a replica otherwise we can't remove a node
     # and have a complete copy of all indexes (i.e., removing one node will make a green
     # cluster red not yellow)
-    NUM_REPLICAS=`curl -sS -XGET $MASTER/_cat/indices?h=rep | awk NF | sort | uniq | paste -s`
+    NUM_REPLICAS=`curl -sS -H 'Content-Type: application/json' -XGET $MASTER/_cat/indices?h=rep | awk NF | sort | uniq | paste -s`
     # if there's a 0 in $NUM_REPLICA abort
     if [[ "$NUM_REPLICAS" =~ 0.* ]] ; then
         echo "There are indices without replicas: $NUM_REPLICAS"
@@ -111,7 +111,7 @@ for NODE in ${NODES[@]}; do
     while [ -z "$STATUS" ];
     do
         # verify cluster is green
-        STATUS=`curl -sS -XGET $MASTER/_cat/health | grep green`
+        STATUS=`curl -sS -H 'Content-Type: application/json' -XGET $MASTER/_cat/health | grep green`
         sleep 1
     done
 
@@ -119,7 +119,7 @@ for NODE in ${NODES[@]}; do
     # created primary shards
 
     echo ">>>>>> Disabling routing allocation"
-    STATUS=`curl -XPUT -sS $MASTER/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "new_primaries" } }'`
+    STATUS=`curl -XPUT -sS -H 'Content-Type: application/json' $MASTER/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "new_primaries" } }'`
 
     if ! [[ "$STATUS" =~ (\"acknowledged\":true) ]] ; then
         echo "Failed acknowledge of allocation disable for ${NODE}"
@@ -139,10 +139,10 @@ for NODE in ${NODES[@]}; do
 
     # wait for the node to stop
     echo ">>>>>> Waiting for node to stop."
-    STATUS=`curl -sS -XGET http://${NODE}/`
+    STATUS=`curl -sS -H 'Content-Type: application/json' -XGET http://${NODE}/`
     while [[ "$STATUS" =~ (\"status\" : 200) ]];
     do
-        STATUS=`curl -sS -XGET http://${NODE}/`
+        STATUS=`curl -sS -H 'Content-Type: application/json' -XGET http://${NODE}/`
 
         sleep 1
     done
@@ -156,7 +156,7 @@ for NODE in ${NODES[@]}; do
     STATUS=""
     while [ -z "$STATUS" ];
     do
-        STATUS=`curl -sS -XGET $MASTER/_cat/health | grep yellow`
+        STATUS=`curl -sS -H 'Content-Type: application/json' -XGET $MASTER/_cat/health | grep yellow`
         sleep 1
     done
 
@@ -175,7 +175,7 @@ for NODE in ${NODES[@]}; do
     while ! [[ "$STATUS" =~ (\"tagline\" : \"You Know, for Search\") ]];
     do
         echo "fetching http://${NODE}/"
-        STATUS=`curl -sS -XGET http://${NODE}/`
+        STATUS=`curl -sS -H 'Content-Type: application/json' -XGET http://${NODE}/`
         sleep 1
     done
 
@@ -184,7 +184,7 @@ for NODE in ${NODES[@]}; do
     STATUS=""
     while [ -z "$STATUS" ];
     do
-        STATUS=`curl -sS -XGET http://${NODE}/_cat/health | grep yellow`
+        STATUS=`curl -sS -H 'Content-Type: application/json' -XGET http://${NODE}/_cat/health | grep yellow`
         sleep 1
     done
 
@@ -200,7 +200,7 @@ for NODE in ${NODES[@]}; do
 
     echo ">>>>>> Re-enabling routing allocation"
     # re-enable routing allocation
-    STATUS=`curl -sS -XPUT ${MASTER}/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" } }'`
+    STATUS=`curl -sS -H 'Content-Type: application/json' -XPUT ${MASTER}/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" } }'`
 
     if ! [[ "$STATUS" =~ (\"acknowledged\":true) ]] ; then
         echo "Failed acknowledge of allocation enable for ${NODE}. Will try again."
@@ -210,7 +210,7 @@ for NODE in ${NODES[@]}; do
 
     echo ">>>>>> Re-enabling routing allocation one more time"
     # re-enable routing allocation
-    STATUS=`curl -sS -XPUT ${MASTER}/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" } }'`
+    STATUS=`curl -sS -H 'Content-Type: application/json' -XPUT ${MASTER}/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" } }'`
 
     if ! [[ "$STATUS" =~ (\"acknowledged\":true) ]] ; then
         echo "Failed acknowledge of allocation enable for ${NODE}. Continuing but manual intervention may be required."
@@ -224,11 +224,11 @@ for NODE in ${NODES[@]}; do
     while [ -z "$STATUS" ];
     do
         # verify cluster is green
-        STATUS=`curl -sS -XGET ${MASTER}/_cat/health | grep green`
+        STATUS=`curl -sS -H 'Content-Type: application/json' -XGET ${MASTER}/_cat/health | grep green`
         COUNT=$((COUNT + 1))
         if [ $COUNT -gt 60 ]  && [ $ITERATIONS -lt 5 ]; then
             echo ">>>>>> Still waiting. verifying routing allocation enabled."
-            UPDATE=`curl -sS -XPUT ${MASTER}/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" } }'`
+            UPDATE=`curl -sS -H 'Content-Type: application/json' -XPUT ${MASTER}/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" } }'`
 
             COUNT=0
             ITERATIONS=$((ITERATIONS + 1))

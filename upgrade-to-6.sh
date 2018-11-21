@@ -3,7 +3,7 @@
 set -e
 
 # Example script to restart an elasticsearch node
-ES_VERSION=6.5.0
+ES_VERSION=6.5.1
 echo "Running updates on $NODE"
 echo "Host: $HOST"
 echo "Port: $PORT"

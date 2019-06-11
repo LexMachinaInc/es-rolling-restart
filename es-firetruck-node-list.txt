@@ -1,2 +1,3 @@
 es-firetruck-2:9200
 es-firetruck-3:9200
+es-firetruck-4:9200
